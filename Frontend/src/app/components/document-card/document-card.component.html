@@ -1,0 +1,46 @@
+<div
+  class="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow h-full flex flex-col"
+>
+  <div class="p-6 flex-grow">
+    <div class="flex items-start justify-between">
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 truncate">
+          {{ document.title }}
+        </h3>
+        <p class="mt-1 text-sm text-gray-500">
+          Last edited {{ document.updatedAt | date : "mediumDate" }}
+        </p>
+      </div>
+      <div class="flex -space-x-2">
+        <img
+          *ngFor="let collab of document.collaborators.slice(0, 3)"
+          [src]="'https://ui-avatars.com/api/?name=' + collab.userId.name"
+          class="h-8 w-8 rounded-full border-2 border-white"
+          [alt]="collab.userId.name"
+        />
+        <div
+          *ngIf="document.collaborators.length > 3"
+          class="h-8 w-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs"
+        >
+          +{{ document.collaborators.length - 3 }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bg-gray-50 px-4 py-4 sm:px-6 flex justify-between items-center">
+    <div class="flex space-x-3">
+      <button
+        [routerLink]="['/document/', document._id]"
+        class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+      >
+        Open
+      </button>
+      <button class="text-gray-500 hover:text-gray-700 text-sm font-medium">
+        Share
+      </button>
+    </div>
+    <div class="text-xs text-gray-500">
+      {{ document.versions.length }} versions
+    </div>
+  </div>
+</div>
