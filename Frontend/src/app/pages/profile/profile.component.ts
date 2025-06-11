@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { UserService } from '../../core/service/User/user.service';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../core/service/Auth/auth.service';
 
 @Component({
@@ -64,6 +64,10 @@ export class ProfileComponent {
     if (!this.user) return;
 
     this.loading = true;
+    this.isEditing = false
+    setTimeout(() => {
+      this.loading = false
+    }, 3000);
 
   }
 }

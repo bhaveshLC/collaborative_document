@@ -12,20 +12,23 @@ import { LoaderComponent } from "../../core/shared/loader/loader.component";
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements OnInit {
-  documents: any[] = [];
+  ownDocuments: any[] = [];
+  sharedDocuments: any[] = []
+  publicDocuments: any[] = []
   documentService = inject(DocumentService)
   router = inject(Router)
   isLoading = false
   ngOnInit(): void {
     this.isLoading = true
     this.documentService.getDocumentList().subscribe((res: any) => {
-      this.documents = res.data
+      this.ownDocuments = res.data.ownDocuments
+      this.sharedDocuments = res.data.sharedDocuments
+      this.publicDocuments = res.data.publicDocuments
       this.isLoading = false
     })
   }
   createDocument() {
     this.documentService.createDocument().subscribe((res: any) => {
-      console.log(res.data)
       this.router.navigateByUrl(`document/${res.data.docId}`)
     })
   }

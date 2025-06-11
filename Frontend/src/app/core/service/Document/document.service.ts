@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpService } from '../Http/http.service';
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -20,5 +21,20 @@ export class DocumentService {
   }
   updateDocument(docId: string, data: any) {
     return this.httpService.patch(`document/${docId}`, data)
+  }
+
+  addCollaborators(docId: string, collaborators: string[]) {
+    return this.httpService.patch(`document/${docId}/add-collaborators`, collaborators)
+  }
+  removeCollaborators(docId: string, collaborators: string[]) {
+    return this.httpService.patch(`document/${docId}/remove-collaborators`, { collaborators })
+  }
+
+  getCollaborators(docId: string) {
+    return this.httpService.get(`document/${docId}/collaborators`)
+  }
+  getRemainingCollaborators(docId: string, searchText: string) {
+    const httpParams = new HttpParams().set('search', searchText)
+    return this.httpService.get(`document/${docId}/pending-collaborators`, httpParams)
   }
 }

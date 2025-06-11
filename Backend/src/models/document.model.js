@@ -39,7 +39,7 @@ const documentSchema = new Schema(
       required: true,
     },
     collaborators: [collaboratorSchema],
-    versions: [versionSchema],
+    // versions: [versionSchema],
     lastModifiedBy: {
       type: Types.ObjectId,
       ref: "User",

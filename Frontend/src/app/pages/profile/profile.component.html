@@ -20,7 +20,7 @@
               <button
                 *ngIf="isEditing"
                 (click)="editFormData.avatarUrl = ''"
-                class="absolute -bottom-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                class="absolute -bottom-2 -right-2 bg-red-500 text-white cursor-pointer rounded-full p-1 hover:bg-red-600"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -53,11 +53,7 @@
         ></div>
       </div>
 
-      <div
-        *ngIf="error"
-        class="bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-2 m-6"
-        role="alert"
-      >
+      <div *ngIf="error" role="alert">
         <p class="font-bold">Error</p>
         <p>{{ error }}</p>
       </div>

@@ -9,8 +9,10 @@ export class HttpService {
   constructor() { }
   http = inject(HttpClient)
 
-  get(url: string) {
-    return this.http.get(apiUrl + url)
+  get(url: string, params?: any) {
+    return this.http.get(apiUrl + url, {
+      params: params || {}
+    });
   }
   post(url: string, data: any) {
     return this.http.post(apiUrl + url, data)

@@ -37,7 +37,7 @@ function socketHandler(io) {
         );
 
         const document = await Document.findById(docId)
-          .populate("collaborators.userId", "name")
+          .populate("collaborators.userId", "name email")
           .populate("lastModifiedBy", "name email")
           .populate("createdBy", "name email");
 
@@ -89,13 +89,11 @@ function socketHandler(io) {
           const decoded = jwt.verify(token, config.JWT_SECRET);
           const userId = decoded._id;
 
-          // Validate that user is in the document
           if (currentDocId !== docId || currentUserId !== userId) {
             socket.emit("error", { message: "Unauthorized access" });
             return;
           }
 
-          // Clear existing timeout for this document
           if (saveQueue.has(docId)) {
             clearTimeout(saveQueue.get(docId));
           }
@@ -108,7 +106,6 @@ function socketHandler(io) {
                 return;
               }
 
-              // Update document fields
               document.content = content;
               document.htmlContent = htmlContent;
               if (title && title.trim()) {
@@ -118,16 +115,16 @@ function socketHandler(io) {
               document.updatedAt = new Date();
 
               // Add to version history
-              document.versions.push({
-                content,
-                htmlContent,
-                modifiedBy: userId,
-                savedAt: new Date(),
-              });
+              // document.versions.push({
+              //   content,
+              //   htmlContent,
+              //   modifiedBy: userId,
+              //   savedAt: new Date(),
+              // });
 
-              if (document.versions.length > 20) {
-                document.versions = document.versions.slice(-20);
-              }
+              // if (document.versions.length > 20) {
+              //   document.versions = document.versions.slice(-20);
+              // }
 
               await document.save();
 
@@ -135,7 +132,6 @@ function socketHandler(io) {
 
               console.log(`Document ${docId} saved by user ${userId}`);
 
-              // Notify all users in the document that it was saved
               io.to(docId).emit("document-saved", {
                 lastModifiedBy: document.lastModifiedBy,
                 updatedAt: document.updatedAt,
@@ -181,7 +177,6 @@ function socketHandler(io) {
           const userInfo = docUsers.get(userId);
           docUsers.delete(userId);
 
-          // Notify other users
           socket.to(docId).emit("user-left", {
             userId: userInfo.userId,
             name: userInfo.name,
@@ -189,11 +184,9 @@ function socketHandler(io) {
 
           console.log(`User ${userId} left document ${docId}`);
 
-          // Clean up if no users left
           if (docUsers.size === 0) {
             documentUsers.delete(docId);
 
-            // Clear any pending saves
             if (saveQueue.has(docId)) {
               clearTimeout(saveQueue.get(docId));
               saveQueue.delete(docId);
@@ -207,7 +200,6 @@ function socketHandler(io) {
 
       socket.leave(docId);
 
-      // Reset current document and user
       if (currentDocId === docId) {
         currentDocId = null;
         currentUserId = null;

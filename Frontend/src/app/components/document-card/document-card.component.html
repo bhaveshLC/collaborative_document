@@ -13,16 +13,16 @@
       </div>
       <div class="flex -space-x-2">
         <img
-          *ngFor="let collab of document.collaborators.slice(0, 3)"
+          *ngFor="let collab of document.collaborators.slice(0, 2)"
           [src]="'https://ui-avatars.com/api/?name=' + collab.userId.name"
           class="h-8 w-8 rounded-full border-2 border-white"
           [alt]="collab.userId.name"
         />
         <div
-          *ngIf="document.collaborators.length > 3"
+          *ngIf="document.collaborators.length > 2"
           class="h-8 w-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs"
         >
-          +{{ document.collaborators.length - 3 }}
+          +{{ document.collaborators.length - 2 }}
         </div>
       </div>
     </div>
@@ -35,12 +35,15 @@
       >
         Open
       </button>
-      <button class="text-gray-500 hover:text-gray-700 text-sm font-medium">
+      <button
+        (click)="onShare(document._id)"
+        class="text-gray-500 hover:text-gray-700 text-sm font-medium"
+      >
         Share
       </button>
     </div>
-    <div class="text-xs text-gray-500">
+    <!-- <div class="text-xs text-gray-500">
       {{ document.versions.length }} versions
-    </div>
+    </div> -->
   </div>
 </div>

@@ -1,5 +1,11 @@
 <div class="min-h-screen bg-gray-50">
-  @if(isLoading) {
+  @if(isCollaboratorsListOpen){
+  <app-collaborator-list
+    [docId]="documentId"
+    [collaborators]="document.collaborators"
+    (closeModal)="closeCollaboratorList()"
+  />
+  } @if(isLoading) {
   <app-loader />
   } @else {
   <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
@@ -52,6 +58,7 @@
           <i class="fa-solid fa-floppy-disk ml-1" style="color: white"></i>
         </button>
         <button
+          (click)="onShare()"
           class="px-3 py-2 border border-gray-300 text-sm rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
         >
           Share
@@ -63,30 +70,27 @@
     <div class="mb-4 flex items-center space-x-2">
       <span class="text-sm text-gray-500">Collaborators:</span>
       <div class="flex -space-x-2">
-        @for(user of collaborators.slice(0, 3); track user.userId) {
         <img
-          class="w-8 h-8 rounded-full border-2 border-white"
-          [src]="'https://ui-avatars.com/api/?name=' + user.userId.name"
-          [alt]="user.userId.name"
-          [title]="user.userId.name"
+          *ngFor="let collab of document.collaborators.slice(0, 2)"
+          [src]="'https://ui-avatars.com/api/?name=' + collab.userId.name"
+          class="h-8 w-8 rounded-full border-2 border-white"
+          [alt]="collab.userId.name"
         />
-        } @if(activeUsers.length > 3) {
         <div
-          class="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs"
-          [title]="'And ' + (activeUsers.length - 3) + ' more'"
+          *ngIf="document.collaborators.length > 2"
+          class="h-8 w-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs"
         >
-          +{{ activeUsers.length - 3 }}
+          +{{ document.collaborators.length - 2 }}
         </div>
-        }
       </div>
       <button
+        (click)="openCollaboratorList()"
         class="ml-2 text-blue-600 hover:text-blue-800 text-sm cursor-pointer"
       >
         Manage
       </button>
     </div>
 
-    <!-- Editor Container -->
     <div
       class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
       [class.opacity-50]="!isConnected"

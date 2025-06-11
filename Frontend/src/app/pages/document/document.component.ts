@@ -9,11 +9,13 @@ import "quill/dist/quill.snow.css"
 import { SocketService } from "../../core/service/Socket/socket.service"
 import { Subject, debounceTime, takeUntil } from "rxjs"
 import { LoaderComponent } from "../../core/shared/loader/loader.component";
+import { CollaboratorListComponent } from "../../components/collaborator-list/collaborator-list.component";
+import { ToastService } from "../../core/service/Toast/toast.service"
 
 @Component({
   selector: "app-document",
   standalone: true,
-  imports: [CommonModule, FormsModule, QuillModule, LoaderComponent],
+  imports: [CommonModule, FormsModule, QuillModule, LoaderComponent, CollaboratorListComponent],
   templateUrl: "./document.component.html",
   styleUrls: ["./document.component.css"],
 })
@@ -33,6 +35,8 @@ export class DocumentComponent implements OnInit, OnDestroy {
   private isReceivingChanges = false
   private editorReady = false
   private initialContentSet = false
+  private toastService = inject(ToastService)
+  isCollaboratorsListOpen = false
 
   documentService = inject(DocumentService)
   route = inject(ActivatedRoute)
@@ -105,7 +109,6 @@ export class DocumentComponent implements OnInit, OnDestroy {
       this.document = data
       this.title = data.title
       this.collaborators = data.collaborators
-      console.log(data.collaborators)
       this.isLoading = false
 
       if (this.editorReady && !this.initialContentSet) {
@@ -127,7 +130,6 @@ export class DocumentComponent implements OnInit, OnDestroy {
     })
 
     this.socketService.on("document-saved", (data: any) => {
-      console.log("Document saved successfully")
       if (this.document) {
         this.document = { ...this.document, ...data }
       }
@@ -140,12 +142,10 @@ export class DocumentComponent implements OnInit, OnDestroy {
     })
 
     this.socketService.on("user-left", (data: any) => {
-      console.log("User left:", data)
       this.activeUsers = this.activeUsers.filter((user) => user.userId !== data.userId)
     })
 
     this.socketService.on("active-users", (users: any[]) => {
-      console.log("Active users:", users)
       this.activeUsers = users
     })
 
@@ -259,7 +259,6 @@ export class DocumentComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (response: any) => {
-          console.log("Document saved successfully")
           if (response.data) {
             this.document = { ...this.document, ...response.data }
           }
@@ -290,4 +289,21 @@ export class DocumentComponent implements OnInit, OnDestroy {
   onReconnect(): void {
     this.socketService.reconnect()
   }
+  openCollaboratorList() {
+    this.isCollaboratorsListOpen = true
+  }
+  closeCollaboratorList() {
+    this.isCollaboratorsListOpen = false
+    this.getCollaborators()
+  }
+  getCollaborators() {
+    this.documentService.getCollaborators(this.documentId).subscribe((res: any) => {
+      this.document.collaborators = res.data
+    })
+  }
+  onShare() {
+    navigator.clipboard.writeText(window.location.href)
+    this.toastService.showAlert('success', 'Copied', 'Successfully copied')
+  }
 }
+

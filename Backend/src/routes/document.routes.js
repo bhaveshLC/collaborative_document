@@ -3,15 +3,21 @@ import {
   createDocument,
   getDocuments,
   getDocument,
-  updateDocument,
   addCollaborator,
+  removeCollaborators,
+  getPendingCollaborators,
+  getCollaborators,
 } from "../controller/document.controller.js";
-import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
 router.post("", createDocument);
 router.get("", getDocuments);
-router.get("/:docId", getDocument).patch("/:docId", addCollaborator);
+router
+  .get("/:docId", getDocument)
+  .get("/:docId/collaborators", getCollaborators)
+  .get("/:docId/pending-collaborators", getPendingCollaborators)
+  .patch("/:docId/add-collaborators", addCollaborator)
+  .patch("/:docId/remove-collaborators", removeCollaborators);
 
 export { router as documentRoute };
