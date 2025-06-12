@@ -1,0 +1,1 @@
+export const apiUrl = "https://collaborative-document-3isr.onrender.com"

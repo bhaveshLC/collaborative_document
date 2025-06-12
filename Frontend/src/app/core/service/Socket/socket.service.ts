@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core"
 import { io, type Socket } from "socket.io-client"
 import { BehaviorSubject, type Observable } from "rxjs"
-import { apiUrl } from "../../../Environment/environment"
+import { apiUrl } from "../../../Environments/environment"
 
 @Injectable({
   providedIn: "root",
