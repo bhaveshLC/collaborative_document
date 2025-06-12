@@ -66,7 +66,27 @@
     </div>
   </div>
 
-  <div *ngIf="ownDocuments.length === 0" class="text-center py-16">
+  @if(sharedDocuments.length > 0){
+  <div class="my-4">
+    <h1 class="text-2xl font-bold text-gray-900">Shared Documents</h1>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div *ngFor="let document of sharedDocuments" class="col-span-1">
+        <app-document-card [document]="document" />
+      </div>
+    </div>
+  </div>
+  } @if(publicDocuments.length >0){
+  <div class="my-4">
+    <h1 class="text-2xl font-bold text-gray-900">Public Documents</h1>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div *ngFor="let document of publicDocuments" class="col-span-1">
+        <app-document-card [document]="document" />
+      </div>
+    </div>
+  </div>
+  } } @if( ownDocuments.length === 0 && sharedDocuments.length === 0 &&
+  publicDocuments.length === 0){
+  <div class="text-center py-16">
     <svg
       class="mx-auto h-12 w-12 text-gray-400"
       fill="none"
@@ -85,23 +105,5 @@
       Get started by creating a new document.
     </p>
   </div>
-  @if(sharedDocuments.length > 0){
-  <div class="my-4">
-    <h1 class="text-2xl font-bold text-gray-900">Shared Documents</h1>
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <div *ngFor="let document of sharedDocuments" class="col-span-1">
-        <app-document-card [document]="document" />
-      </div>
-    </div>
-  </div>
-  } @if(publicDocuments.length >0){
-  <div class="my-4">
-    <h1 class="text-2xl font-bold text-gray-900">Public Documents</h1>
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <div *ngFor="let document of sharedDocuments" class="col-span-1">
-        <app-document-card [document]="document" />
-      </div>
-    </div>
-  </div>
-  } }
+  }
 </main>

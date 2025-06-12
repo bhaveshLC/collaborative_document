@@ -6,7 +6,7 @@ async function createDocument(createdBy) {
     title: "Document",
     content: "",
     createdBy,
-    collaborators: [{ userId: createdBy }],
+    collaborators: [{ userId: createdBy, status: "approved" }],
     // versions: [
     //   {
     //     content: "",
@@ -25,13 +25,26 @@ async function getDocuments(userId) {
       "name"
     ),
     Document.find({
-      "collaborators.userId": userId,
+      collaborators: {
+        $elemMatch: {
+          userId,
+          status: "approved",
+        },
+      },
       createdBy: { $ne: userId },
     }).populate("collaborators.userId", "name"),
+
     Document.find({
       isPublic: true,
       createdBy: { $ne: userId },
-      "collaborators.userId": { $ne: userId },
+      collaborators: {
+        $not: {
+          $elemMatch: {
+            userId: userId,
+            status: "approved",
+          },
+        },
+      },
     }).populate("collaborators.userId", "name"),
   ]);
 
@@ -41,7 +54,7 @@ async function getDocuments(userId) {
     publicDocuments,
   };
 }
-async function getDocument(docId) {
+async function getDocument(docId, userId) {
   const document = await Document.findById(docId)
     .populate("collaborators.userId", "name")
     .populate("lastModifiedBy", "name email");
@@ -51,6 +64,16 @@ async function getDocument(docId) {
     error.statusCode = 404;
     throw error;
   }
+  const hasAccess = await document.hasAccess(userId);
+  if (!hasAccess) {
+    const error = new Error("UnAuthorized");
+    error.statusCode = 401;
+    throw error;
+  }
+  const approvedCollaborators = document.collaborators.filter(
+    (c) => c.status === "approved"
+  );
+  document.collaborators = approvedCollaborators;
   // const versions = document.versions || [];
   // const lastModifiedBy =
   //   versions.length > 0 ? versions[versions.length - 1].modifiedBy : null;
@@ -130,14 +153,25 @@ async function removeCollaborators(docId, userId, collaboratorsToRemove) {
 async function getCollaborators(docId) {
   const document = await Document.findById(docId).populate(
     "collaborators.userId",
-    "name"
+    "name status"
   );
   if (!document) {
     const error = new Error("Document not found");
     error.statusCode = 404;
     throw error;
   }
-  return document.collaborators;
+  const pending = [];
+  const approved = [];
+
+  for (const collab of document.collaborators) {
+    if (collab.status === "pending") {
+      pending.push(collab);
+    } else if (collab.status === "approved") {
+      approved.push(collab);
+    }
+  }
+
+  return { pending, approved };
 }
 async function getPendingCollaborators(docId, queryObj = {}) {
   const document = await Document.findById(docId);
@@ -172,6 +206,67 @@ async function getPendingCollaborators(docId, queryObj = {}) {
   return nonCollaborators;
 }
 
+async function getPendingInvitations(userId) {
+  console.log(userId);
+  const invitations = await Document.find({
+    collaborators: {
+      $elemMatch: {
+        userId,
+        status: "pending",
+      },
+    },
+  })
+    .populate("createdBy", "name email")
+    .populate("collaborators.userId", "name email")
+    .select("title createdBy collaborators updatedAt");
+
+  const filtered = invitations.map((doc) => {
+    const userCollab = doc.collaborators.find(
+      (c) =>
+        c.userId._id.toString() === userId.toString() && c.status === "pending"
+    );
+    return {
+      _id: doc._id,
+      title: doc.title,
+      createdBy: doc.createdBy,
+      updatedAt: doc.updatedAt,
+      invitation: {
+        role: userCollab.role,
+        joinedAt: userCollab.joinedAt,
+      },
+    };
+  });
+  return filtered;
+}
+
+async function invitationAction(docId, userId, action) {
+  const document = await Document.findById(docId);
+  if (!document) {
+    const error = new Error("Document not found");
+    error.statusCode = 404;
+    throw error;
+  }
+  const userCollabIndex = document.collaborators.findIndex(
+    (c) =>
+      c.userId._id.toString() === userId.toString() && c.status === "pending"
+  );
+  if (userCollabIndex === -1) {
+    const error = new Error("No pending invitation found for this user");
+    error.statusCode = 404;
+    throw error;
+  }
+  if (action === "cancel") {
+    document.collaborators.splice(userCollabIndex, 1);
+  } else if (action === "approved") {
+    document.collaborators[userCollabIndex].status = "approved";
+  } else {
+    const error = new Error("Invalid action");
+    error.statusCode = 400;
+    throw error;
+  }
+  await document.save();
+  return `Invitation ${action} successful`;
+}
 export const documentService = {
   createDocument,
   getDocuments,
@@ -180,4 +275,6 @@ export const documentService = {
   removeCollaborators,
   getCollaborators,
   getPendingCollaborators,
+  getPendingInvitations,
+  invitationAction,
 };

@@ -11,12 +11,13 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './collaborator-list.component.css'
 })
 export class CollaboratorListComponent implements OnDestroy {
-  @Input() collaborators: any[] = [];
+  collaborators: any[] = [];
   @Input() docId: string = '';
-  @Output() closeModal: EventEmitter<void> = new EventEmitter<void>();
+  @Output() closeModal: EventEmitter<any> = new EventEmitter<any>();
   @Output() collaboratorsUpdated: EventEmitter<void> = new EventEmitter<void>();
 
   pendingCollaborators: any[] = [];
+  pendingInvitations: any[] = []
   addCollaboratorList: any[] = [];
   removeCollaboratorList: string[] = [];
   activeTab: string = 'current';
@@ -26,22 +27,31 @@ export class CollaboratorListComponent implements OnDestroy {
   isLoading = false;
 
   onCloseModal() {
-    this.closeModal.emit();
+    this.closeModal.emit(false);
   }
 
   ngOnInit() {
+    this.getCollaborators()
     this.resetComponentState();
-  }
+    this.remainingCollaborators();
 
+  }
+  getCollaborators() {
+    this.isLoading = true
+    this.documentService.getCollaborators(this.docId).subscribe((res: any) => {
+      this.collaborators = res.data.approved
+      this.pendingInvitations = res.data.pending
+      this.isLoading = false
+    })
+  }
   resetComponentState() {
     this.pendingCollaborators = [];
     this.addCollaboratorList = [];
     this.removeCollaboratorList = [];
+    this.pendingInvitations = []
     this.activeTab = 'current';
     this.newCollaboratorEmail = "";
     this.error = null;
-    this.remainingCollaborators();
-
   }
 
   remainingCollaborators() {
@@ -107,7 +117,7 @@ export class CollaboratorListComponent implements OnDestroy {
 
   onSave() {
     if (this.addCollaboratorList.length === 0 && this.removeCollaboratorList.length === 0) {
-      this.closeModal.emit();
+      this.closeModal.emit(true);
       return;
     }
 
@@ -140,7 +150,7 @@ export class CollaboratorListComponent implements OnDestroy {
   private handleSuccess() {
     this.isLoading = false;
     this.collaboratorsUpdated.emit();
-    this.closeModal.emit();
+    this.closeModal.emit(true);
   }
 
   private handleError(err: any) {

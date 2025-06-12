@@ -14,7 +14,7 @@ export class SocketService {
 
   constructor() {
     this.socket = io(apiUrl, {
-      transports: ["websocket", "polling"], // Fallback to polling if websocket fails
+      transports: ["websocket", "polling"],
       autoConnect: true,
       reconnection: true,
       reconnectionDelay: 1000,

@@ -12,7 +12,8 @@ export async function getDocuments(req, res) {
 }
 export async function getDocument(req, res) {
   const { docId } = req.params;
-  const document = await documentService.getDocument(docId);
+  const userId = req.user._id;
+  const document = await documentService.getDocument(docId, userId);
   res.status(200).json({ status: "success", statusCode: 200, data: document });
 }
 
@@ -61,4 +62,19 @@ export async function getPendingCollaborators(req, res) {
   res
     .status(201)
     .json({ status: "success", statusCode: 200, data: pendingCollaborators });
+}
+
+export async function getPendingInvitations(req, res) {
+  const userId = req.user._id;
+  const invitations = await documentService.getPendingInvitations(userId);
+  res
+    .status(200)
+    .json({ status: "success", statusCode: 200, data: invitations });
+}
+
+export async function invitationAction(req, res) {
+  const userId = req.user._id;
+  const { docId, action } = req.params;
+  const data = await documentService.invitationAction(docId, userId, action);
+  res.status(200).json({ status: "success", statusCode: 200, data });
 }

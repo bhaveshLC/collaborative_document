@@ -18,6 +18,10 @@ export const routes: Routes = [
             {
                 path: "self",
                 loadComponent: () => import("./pages/profile/profile.component").then(m => m.ProfileComponent)
+            },
+            {
+                path: "invitations",
+                loadComponent: () => import("./pages/invitations/invitations.component").then((m) => m.InvitationsComponent)
             }
         ]
     },

@@ -4,6 +4,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/service/Auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/service/Toast/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -15,6 +16,7 @@ export class RegisterComponent {
   signupForm!: FormGroup
   authService = inject(AuthService)
   router = inject(Router)
+  toastService = inject(ToastService)
   constructor(private fb: FormBuilder) {
     this.signupForm = this.fb.group({
       name: ['', Validators.required],
@@ -30,7 +32,7 @@ export class RegisterComponent {
       password: this.signupForm.value.password,
     }
     this.authService.register(userObj).subscribe((res: any) => {
-      alert('User created successfully')
+      this.toastService.showAlert("success", "Register successfully", 'User created successfully')
       this.router.navigateByUrl("login")
     }, error => {
       console.log(error.error.message)

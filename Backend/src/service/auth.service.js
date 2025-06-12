@@ -34,6 +34,7 @@ async function registerUser(user) {
     error.statusCode = 409;
     throw error;
   }
+  user.avatar = `https://ui-avatars.com/api/?name=${user.name}`;
   const newUser = await User.create(user);
   await newUser.save();
   return newUser;

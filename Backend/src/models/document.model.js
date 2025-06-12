@@ -14,6 +14,11 @@ const collaboratorSchema = new Schema({
     enum: ["owner", "editor"],
     default: "owner",
   },
+  status: {
+    type: String,
+    enum: ["pending", "approved"],
+    default: "pending",
+  },
   joinedAt: { type: Date, default: Date.now },
 });
 
@@ -62,8 +67,8 @@ const documentSchema = new Schema(
 
 documentSchema.index({ createdBy: 1, updatedAt: -1 });
 documentSchema.index({ "collaborators.userId": 1 });
-documentSchema.index({ title: "text", htmlContent: "text" }); // Text search
-documentSchema.index({ updatedAt: -1 }); // Recent documents
+documentSchema.index({ title: "text", htmlContent: "text" });
+documentSchema.index({ updatedAt: -1 });
 
 documentSchema.virtual("collaboratorCount").get(function () {
   return this.collaborators.length;
@@ -72,9 +77,9 @@ documentSchema.virtual("collaboratorCount").get(function () {
 documentSchema.methods.hasAccess = function (userId) {
   return (
     this.createdBy.toString() === userId.toString() ||
-    this.collaborators.some(
-      (collab) => collab.userId.toString() === userId.toString()
-    ) ||
+    this.collaborators.some((collab) => {
+      return collab.userId._id.toString() === userId.toString();
+    }) ||
     this.isPublic
   );
 };
@@ -98,6 +103,9 @@ documentSchema.pre("save", function (next) {
   next();
 });
 
+documentSchema.methods.getApprovedCollaborators = function () {
+  return this.collaborators.filter((c) => c.status === "approved");
+};
 const Document = mongoose.model("Document", documentSchema);
 
 export default Document;

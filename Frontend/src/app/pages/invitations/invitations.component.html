@@ -1,0 +1,131 @@
+<div class="max-w-4xl mx-auto p-4">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6">Pending Invitations</h1>
+
+  <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    @if(invitations.length > 0) {
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-100">
+        <tr>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+          >
+            Document
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+          >
+            Owner
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+          >
+            Role
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        @for (invitation of invitations; track $index) {
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="font-medium text-gray-900">{{ invitation.title }}</div>
+            <div class="text-sm text-gray-500">
+              Updated: {{ invitation.updatedAt | date : "mediumDate" }}
+            </div>
+          </td>
+
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="font-medium">{{ invitation.createdBy.name }}</div>
+            <div class="text-sm text-gray-500">
+              {{ invitation.createdBy.email }}
+            </div>
+          </td>
+
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span
+              class="px-3 py-1 rounded-full text-xs font-medium capitalize"
+              [class.bg-blue-100]="invitation.invitation.role === 'editor'"
+              [class.text-blue-800]="invitation.invitation.role === 'editor'"
+            >
+              {{ invitation.invitation.role }}
+            </span>
+          </td>
+
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex space-x-2">
+              <button
+                (click)="openConfirmationModal('approved')"
+                class="p-2 text-green-600 hover:bg-green-50 rounded-full"
+                title="Accept"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <button
+                (click)="openConfirmationModal('cancel')"
+                class="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                title="Decline"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        @if(isConfirmationActive){
+        <app-confirmation-dialog
+          (confirm)="onUpdate(invitation._id)"
+          (cancel)="isConfirmationActive = false"
+        />
+        } }
+      </tbody>
+    </table>
+    } @else {
+    <div class="text-center py-12 text-gray-500">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-12 w-12 mx-auto text-gray-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+        />
+      </svg>
+      <p class="mt-4 text-lg">No pending invitations</p>
+    </div>
+    }
+  </div>
+</div>

@@ -2,12 +2,13 @@
   @if(isCollaboratorsListOpen){
   <app-collaborator-list
     [docId]="documentId"
-    [collaborators]="document.collaborators"
-    (closeModal)="closeCollaboratorList()"
+    (closeModal)="closeCollaboratorList($event)"
   />
   } @if(isLoading) {
   <app-loader />
-  } @else {
+  } @else { @if(!isAuthorized){
+  <app-un-authorized />
+  }@else{
   <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
     <div class="mb-2 flex justify-between items-center">
       <div class="flex items-center space-x-2">
@@ -40,23 +41,35 @@
     <div
       class="max-w-7xl py-4 flex flex-wrap sm:flex-nowrap justify-between gap-2 items-center"
     >
-      <input
-        type="text"
-        class="sm:text-3xl text-2xl font-bold text-gray-800 border-none focus:ring-0 px-0 bg-transparent focus:outline-none"
-        placeholder="Document Title"
-        [(ngModel)]="title"
-        (ngModelChange)="onTitleChange()"
-        [disabled]="!isConnected"
-      />
+      <div class="relative group">
+        <input
+          type="text"
+          class="sm:text-3xl text-2xl font-bold text-gray-800 border-none focus:ring-0 px-0 bg-transparent focus:outline-none truncate"
+          placeholder="Document Title"
+          [(ngModel)]="title"
+          (ngModelChange)="onTitleChange()"
+          [disabled]="!isConnected || !isCollaborator"
+        />
+        @if(title){
+        <div
+          class="absolute z-10 hidden group-hover:block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm whitespace-nowrap mt-1"
+        >
+          {{ title }}
+          <div
+            class="absolute w-2 h-2 bg-gray-900 transform rotate-45 -translate-x-1/2 translate-y-1 left-1/2 top-0"
+          ></div>
+        </div>
+        }
+      </div>
       <div class="flex space-x-4">
-        <button
+        <!-- <button
           class="px-3 py-2 bg-blue-600 text-sm text-white rounded-md cursor-pointer hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           (click)="onSave()"
           [disabled]="!isConnected"
         >
           Save
           <i class="fa-solid fa-floppy-disk ml-1" style="color: white"></i>
-        </button>
+        </button> -->
         <button
           (click)="onShare()"
           class="px-3 py-2 border border-gray-300 text-sm rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
@@ -70,25 +83,28 @@
     <div class="mb-4 flex items-center space-x-2">
       <span class="text-sm text-gray-500">Collaborators:</span>
       <div class="flex -space-x-2">
+        @for (collab of document.collaborators.slice(0, 2); track $index) {
         <img
-          *ngFor="let collab of document.collaborators.slice(0, 2)"
           [src]="'https://ui-avatars.com/api/?name=' + collab.userId.name"
           class="h-8 w-8 rounded-full border-2 border-white"
           [alt]="collab.userId.name"
         />
+        } @if(document.collaborators.length > 2){
         <div
-          *ngIf="document.collaborators.length > 2"
           class="h-8 w-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs"
         >
           +{{ document.collaborators.length - 2 }}
         </div>
+        }
       </div>
+      @if(isOwner){
       <button
         (click)="openCollaboratorList()"
         class="ml-2 text-blue-600 hover:text-blue-800 text-sm cursor-pointer"
       >
         Manage
       </button>
+      }
     </div>
 
     <div
@@ -100,14 +116,13 @@
           [(ngModel)]="content"
           [modules]="modules"
           placeholder="Start writing here..."
-          class="prose max-w-none"
+          class="prose max-w-none w-full"
           [styles]="{ height: '60vh', fontSize: '1rem' }"
           (onEditorCreated)="onEditorCreated($event)"
-          [readOnly]="!isConnected"
+          [readOnly]="!isCollaborator"
         ></quill-editor>
       </div>
 
-      <!-- Document Info Footer -->
       <div
         class="flex justify-end relative border-t border-gray-100 bg-gray-50 px-4 py-2"
       >
@@ -139,7 +154,6 @@
       </div>
     </div>
 
-    <!-- Offline Notice -->
     @if(!isConnected) {
     <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-md p-4">
       <div class="flex">
@@ -159,5 +173,5 @@
     </div>
     }
   </main>
-  }
+  } }
 </div>

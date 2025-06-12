@@ -1,0 +1,60 @@
+<div
+  class="relative z-10"
+  aria-labelledby="dialog-title"
+  role="dialog"
+  aria-modal="true"
+>
+  <div
+    class="fixed inset-0 bg-gray-500/75 transition-opacity"
+    aria-hidden="true"
+  ></div>
+
+  <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+    <div
+      class="flex h-screen justify-center p-4 text-center sm:items-center sm:p-0"
+    >
+      <div
+        class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+      >
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <div class="flex flex-col items-center">
+            <div class="mb-4 text-red-500">
+              <svg
+                class="w-16 h-16"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                ></path>
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold mb-4 text-center">{{ title }}</h2>
+            <p class="text-gray-600 mb-6 text-center">{{ message }}</p>
+
+            <div class="flex justify-center space-x-4 w-full">
+              <button
+                (click)="onCancel()"
+                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                (click)="onConfirm()"
+                class="px-4 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                [ngClass]="buttonColor"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

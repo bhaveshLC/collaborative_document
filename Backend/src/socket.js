@@ -1,6 +1,7 @@
 import Document from "./models/document.model.js";
 import jwt from "jsonwebtoken";
 import { config } from "./config/config.js";
+import { documentService } from "./service/document.service.js";
 
 const documentUsers = new Map();
 const saveQueue = new Map();
@@ -36,11 +37,10 @@ function socketHandler(io) {
           `User ${currentUserId} (${socket.id}) joined document ${docId}`
         );
 
-        const document = await Document.findById(docId)
-          .populate("collaborators.userId", "name email")
-          .populate("lastModifiedBy", "name email")
-          .populate("createdBy", "name email");
-
+        const document = await documentService.getDocument(
+          docId,
+          currentUserId
+        );
         if (document) {
           socket.emit("load-document", document);
 

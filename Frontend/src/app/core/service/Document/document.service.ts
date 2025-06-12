@@ -37,4 +37,12 @@ export class DocumentService {
     const httpParams = new HttpParams().set('search', searchText)
     return this.httpService.get(`document/${docId}/pending-collaborators`, httpParams)
   }
+
+  getInvitation() {
+    return this.httpService.get("document/invitations")
+  }
+
+  collaborationAction(docId: string, action: string) {
+    return this.httpService.patch(`document/${docId}/invitation/${action}`, {})
+  }
 }

@@ -22,7 +22,7 @@
           <img
             class="h-8 w-8 rounded-full"
             id="userProfile"
-            src="https://media.istockphoto.com/id/1142192548/vector/man-avatar-profile-male-face-silhouette-or-icon-isolated-on-white-background-vector.jpg?s=1024x1024&w=is&k=20&c=ISYAkNv_k8SCN_pHkYWqlWdGSbirhx_yCigo7QC8NAw="
+            [src]="user.avatar"
             alt="User profile"
           />
         </button>
@@ -36,6 +36,14 @@
             class="block px-4 py-2 w-full text-start cusrsor-pointer text-sm text-gray-700 hover:bg-gray-100"
           >
             Profile
+          </button>
+          <hr class="text-gray-200" />
+
+          <button
+            routerLink="/invitations"
+            class="block px-4 py-2 w-full text-start cusrsor-pointer text-sm text-gray-700 hover:bg-gray-100"
+          >
+            Invitations
           </button>
           <hr class="text-gray-200" />
           <button

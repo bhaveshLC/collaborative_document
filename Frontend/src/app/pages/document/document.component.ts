@@ -11,11 +11,12 @@ import { Subject, debounceTime, takeUntil } from "rxjs"
 import { LoaderComponent } from "../../core/shared/loader/loader.component";
 import { CollaboratorListComponent } from "../../components/collaborator-list/collaborator-list.component";
 import { ToastService } from "../../core/service/Toast/toast.service"
+import { UnAuthorizedComponent } from "../../components/un-authorized/un-authorized.component";
 
 @Component({
   selector: "app-document",
   standalone: true,
-  imports: [CommonModule, FormsModule, QuillModule, LoaderComponent, CollaboratorListComponent],
+  imports: [CommonModule, FormsModule, QuillModule, LoaderComponent, CollaboratorListComponent, UnAuthorizedComponent],
   templateUrl: "./document.component.html",
   styleUrls: ["./document.component.css"],
 })
@@ -29,7 +30,8 @@ export class DocumentComponent implements OnInit, OnDestroy {
   activeUsers: any[] = []
   collaborators: any[] = []
   isLoading = true
-
+  isOwner = false;
+  isCollaborator = false
   private destroy$ = new Subject<void>()
   private saveSubject = new Subject<void>()
   private isReceivingChanges = false
@@ -42,7 +44,7 @@ export class DocumentComponent implements OnInit, OnDestroy {
   route = inject(ActivatedRoute)
   socketService = inject(SocketService)
   quillInstance!: Quill
-
+  isAuthorized = true
   modules = {
     table: true,
     toolbar: [
@@ -63,8 +65,11 @@ export class DocumentComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.setupSaveDebouncing()
-    this.setupSocketListeners()
 
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.documentId = params["docId"]
+      this.loadDocument()
+    })
     this.socketService
       .getConnectionStatus()
       .pipe(takeUntil(this.destroy$))
@@ -75,10 +80,6 @@ export class DocumentComponent implements OnInit, OnDestroy {
         }
       })
 
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      this.documentId = params["docId"]
-      this.loadDocument()
-    })
   }
 
   ngOnDestroy(): void {
@@ -165,9 +166,20 @@ export class DocumentComponent implements OnInit, OnDestroy {
         this.title = res.data.title
         this.content = res.data.content
         this.collaborators = res.data.collaborators
+
+        const currentUserId = this.getCurrentUserId();
+        if (currentUserId == res.data.createdBy) this.isOwner = true
+
+        this.isInCollaboratorList(currentUserId)
         this.joinDocument()
+        this.setupSocketListeners()
+
+        this.isLoading = false
       },
       error: (error) => {
+        if (error.error.statusCode == 401 && error.error.message == "UnAuthorized") {
+          this.isAuthorized = false
+        }
         console.error("Error loading document:", error)
         this.isLoading = false
       },
@@ -245,30 +257,6 @@ export class DocumentComponent implements OnInit, OnDestroy {
     })
   }
 
-  onSave(): void {
-    if (!this.quillInstance) return
-
-    const content = this.quillInstance.getContents()
-    const htmlContent = this.quillInstance.root.innerHTML
-
-    this.documentService
-      .updateDocument(this.documentId, {
-        title: this.title,
-        content: content,
-        htmlContent: htmlContent,
-      })
-      .subscribe({
-        next: (response: any) => {
-          if (response.data) {
-            this.document = { ...this.document, ...response.data }
-          }
-        },
-        error: (err) => {
-          console.error("Error saving document:", err)
-        },
-      })
-  }
-
   private getCurrentUserId(): string {
     try {
       const token = localStorage.getItem("token")
@@ -292,18 +280,27 @@ export class DocumentComponent implements OnInit, OnDestroy {
   openCollaboratorList() {
     this.isCollaboratorsListOpen = true
   }
-  closeCollaboratorList() {
+  closeCollaboratorList(isDataChanged: boolean) {
     this.isCollaboratorsListOpen = false
-    this.getCollaborators()
+    if (isDataChanged) {
+      this.getCollaborators()
+    }
   }
   getCollaborators() {
     this.documentService.getCollaborators(this.documentId).subscribe((res: any) => {
-      this.document.collaborators = res.data
+      this.document.collaborators = res.data.approved
     })
   }
   onShare() {
     navigator.clipboard.writeText(window.location.href)
     this.toastService.showAlert('success', 'Copied', 'Successfully copied')
+  }
+
+  isInCollaboratorList(id: string) {
+    if (this.document.collaborators.some((c: any) => c.userId._id === id)) {
+      this.isCollaborator = true
+      console.log(this.isCollaborator)
+    }
   }
 }
 

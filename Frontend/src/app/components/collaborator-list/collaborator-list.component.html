@@ -11,7 +11,7 @@
 
   <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
     <div
-      class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
+      class="flex h-auto justify-center p-4 text-center sm:items-center sm:p-0"
     >
       <div
         class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
@@ -50,7 +50,14 @@
                   </button>
                 </nav>
               </div>
-
+              @if(isLoading){
+              <div class="text-center mt-5">
+                <div
+                  class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"
+                ></div>
+                <p class="mt-4 text-gray-600">Loading collaborators...</p>
+              </div>
+              }@else{
               <div *ngIf="activeTab === 'current'" class="mt-4">
                 <div class="text-sm text-gray-500 mb-4">
                   These people currently have access to this project.
@@ -62,13 +69,6 @@
                     class="flex items-center justify-between"
                   >
                     <div class="flex items-center">
-                      <!-- <div
-                        class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center mr-3"
-                      >
-                        <span class="text-xs text-gray-600">{{
-                          collaborator.userId.name.charAt(0)
-                        }}</span>
-                      </div> -->
                       <img
                         [src]="
                           'https://ui-avatars.com/api/?name=' +
@@ -101,6 +101,43 @@
                     }
                   </div>
                 </div>
+                @if(pendingInvitations.length >0){
+                <hr
+                  class="h-0.5 mx-auto my-4 bg-gray-200 border-0 rounded-sm md:my-10"
+                />
+                <div class="text-sm text-gray-500 mb-4">
+                  Pending Invitations
+                </div>
+
+                <div class="space-y-4">
+                  <div
+                    *ngFor="let collaborator of pendingInvitations"
+                    class="flex items-center justify-between"
+                  >
+                    <div class="flex items-center">
+                      <img
+                        [src]="
+                          'https://ui-avatars.com/api/?name=' +
+                          collaborator.userId.name
+                        "
+                        class="h-8 w-8 rounded-full border-2 border-white mr-2"
+                      />
+                      <div>
+                        <p class="text-sm font-medium text-gray-900">
+                          {{ collaborator.userId.name }}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          {{ collaborator.userId.email }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button class="text-yellow-600 text-sm font-medium">
+                      Pending
+                    </button>
+                  </div>
+                </div>
+                }
               </div>
 
               <div *ngIf="activeTab === 'add'" class="mt-4">
@@ -194,6 +231,7 @@
                   </div>
                 </div>
               </div>
+              }
             </div>
           </div>
         </div>

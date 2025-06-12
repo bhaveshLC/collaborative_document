@@ -18,7 +18,7 @@ export class ProfileComponent {
   editFormData = {
     name: '',
     email: '',
-    avatarUrl: ''
+    avatar: ''
   };
 
   constructor(
@@ -39,7 +39,7 @@ export class ProfileComponent {
         this.editFormData = {
           name: user.name,
           email: user.email,
-          avatarUrl: user.avatarUrl || ''
+          avatar: user.avatar || ''
         };
         this.loading = false;
       },
